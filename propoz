@@ -1,0 +1,9 @@
+WE:
+-optymalizacja -> tragiczna, średnia, dobra, wyśmienita
+-game_breaking_bugs -> brak, mało, umiarkowana ilosc, wiele
+-story_quality -> nudna, umiarkowana, ciekawa
+-game_lenght -> krotka, umairkowana, długa, bardzo długa
+-price -> tania, umiarkowana, droga
+
+WY:
+-Game_quality -> (0-10) -> tragiczna, zła, średnia, dobra, wyśmienita

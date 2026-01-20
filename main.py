@@ -62,30 +62,34 @@ my_tsk.add_output_variable("Difficulty")
 my_tsk.add_output_variable("Complexity")
 
 
-# Rząd 1: Mało mechanik (Few)
 my_tsk.add_rule([("PEGI", pegi_low),  ("Mechanics", mech_few)], [("Difficulty", diff_easy), ("Complexity", comp_low)])
 my_tsk.add_rule([("PEGI", pegi_med),  ("Mechanics", mech_few)], [("Difficulty", diff_easy), ("Complexity", comp_low)])
 my_tsk.add_rule([("PEGI", pegi_high), ("Mechanics", mech_few)], [("Difficulty", diff_easy), ("Complexity", comp_low)]) # Np. Walking simulator
 
-# Rząd 2: Średnio mechanik (Avg)
 my_tsk.add_rule([("PEGI", pegi_low),  ("Mechanics", mech_avg)], [("Difficulty", diff_medium), ("Complexity", comp_med)])
 my_tsk.add_rule([("PEGI", pegi_med),  ("Mechanics", mech_avg)], [("Difficulty", diff_medium), ("Complexity", comp_med)])
 my_tsk.add_rule([("PEGI", pegi_high), ("Mechanics", mech_avg)], [("Difficulty", diff_medium), ("Complexity", comp_med)])
 
-# Rząd 3: Dużo mechanik (Many)
 my_tsk.add_rule([("PEGI", pegi_low),  ("Mechanics", mech_many)], [("Difficulty", diff_hard), ("Complexity", comp_high)])
 my_tsk.add_rule([("PEGI", pegi_med),  ("Mechanics", mech_many)], [("Difficulty", diff_hard), ("Complexity", comp_high)])
 my_tsk.add_rule([("PEGI", pegi_high), ("Mechanics", mech_many)], [("Difficulty", diff_hard), ("Complexity", comp_high)]) # Np. Symulator lotu / RPG
 
+# w3
+input_pegi =  3.0
+input_mech = 8.0
 
-# PRZYKŁAD: Gra PEGI 16, która ma 8 mechanik (dość złożona)
-input_pegi = 12.0
-input_mech = 2.0
+#
+"""
+geams = [
+    g1 ->
+    g2 ->
+]
+
+"""
 
 results = my_tsk.evaluate(
     {"PEGI": input_pegi, "Mechanics": input_mech}, (input_pegi, input_mech))
 
-print(f"--- WYNIKI SYMULACJI ---")
 print(f"Wejście -> PEGI: {input_pegi}, Ilość Mechanik: {input_mech}")
-print(f"Ocena Trudności (0-10):      {round(results['Difficulty'], 2)}")
-print(f"Ocena Skomplikowania (0-10): {round(results['Complexity'], 2)}")
+print(f"Ocena Trudności: {round(results['Difficulty'], 2)}")
+print(f"Ocena Skomplikowania: {round(results['Complexity'], 2)}")
