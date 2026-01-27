@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Game A",
+    "Optymalizacja": 9.0,
+    "Bugi": 1.0,
+    "Fabula": 8.5,
+    "Dlugosc": 30.0,
+    "Cena": 120.0
+  },
+  {
+    "name": "Game B",
+    "Optymalizacja": 7.5,
+    "Bugi": 2.0,
+    "Fabula": 9.0,
+    "Dlugosc": 50.0,
+    "Cena": 200.0
+  },
+  {
+    "name": "Game C",
+    "Optymalizacja": 6.0,
+    "Bugi": 3.5,
+    "Fabula": 7.0,
+    "Dlugosc": 20.0,
+    "Cena": 80.0
+  },
+  {
+    "name": "Game D",
+    "Optymalizacja": 8.0,
+    "Bugi": 1.5,
+    "Fabula": 6.5,
+    "Dlugosc": 15.0,
+    "Cena": 60.0
+  },
+  {
+    "name": "Game E",
+    "Optymalizacja": 5.0,
+    "Bugi": 4.0,
+    "Fabula": 9.5,
+    "Dlugosc": 40.0,
+    "Cena": 150.0
+  }
+]
