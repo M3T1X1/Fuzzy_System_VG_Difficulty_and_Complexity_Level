@@ -1,186 +1,89 @@
 import numpy as np
-<<<<<<< HEAD
 import matplotlib.pyplot as plt
 from pyit2fls import T1TSK, T1FS, tri_mf, trapezoid_mf
+import json
 
-# Uniwersa
-pegi_domain = np.linspace(0, 18, 200)
-mech_domain = np.linspace(0, 20, 200)
+#uniwersa
+opt_universe = np.linspace(0, 10, 100)
+bug_universe = np.linspace(0, 10, 100)
+story_universe = np.linspace(0, 10, 100)
+len_universe = np.linspace(5, 50, 100)
+price_universe = np.linspace(0, 300, 100)
 
-# Wejście 1: PEGI
-pegi_low  = T1FS(pegi_domain, trapezoid_mf, [-1, 0, 7, 10, 1.0])  # Dla dzieci (3-7)
-pegi_med  = T1FS(pegi_domain, tri_mf, [7, 12, 16, 1.0])           # Nastolatki (12-16)
-pegi_high = T1FS(pegi_domain, tri_mf, [14, 16, 18, 1.0]) # Dorośli (18+)
+#zbiory rozmyte
+opt_tragic = T1FS(opt_universe, trapezoid_mf, [-0.1, 0, 2, 4, 1.0])
+opt_mid    = T1FS(opt_universe, tri_mf, [3, 5, 7, 1.0])
+opt_good   = T1FS(opt_universe, tri_mf, [6, 8, 9, 1.0])
+opt_perf   = T1FS(opt_universe, trapezoid_mf, [8, 9, 10, 10.1, 1.0])
 
-# Wejście 2: Ilość Mechanik
-mech_few  = T1FS(mech_domain, trapezoid_mf, [-1, 0, 3, 5, 1.0])   # Prosta gra
-mech_avg  = T1FS(mech_domain, tri_mf, [3, 6, 9, 1.0])             # Standardowa
-mech_many = T1FS(mech_domain, trapezoid_mf, [7, 10, 15, 16, 1.0]) # Złożona
+bug_none   = T1FS(bug_universe, trapezoid_mf, [-0.1, 0, 1, 2, 1.0])
+bug_few    = T1FS(bug_universe, tri_mf, [1, 3, 5, 1.0])
+bug_med    = T1FS(bug_universe, tri_mf, [4, 6, 8, 1.0])
+bug_many   = T1FS(bug_universe, trapezoid_mf, [7, 9, 10, 10.1, 1.0])
 
-plt.figure(figsize=(12, 5))
+sto_boring = T1FS(story_universe, trapezoid_mf, [-0.1, 0, 3, 5, 1.0])
+sto_mid    = T1FS(story_universe, tri_mf, [4, 6, 8, 1.0])
+sto_cool   = T1FS(story_universe, trapezoid_mf, [7, 9, 10, 10.1, 1.0])
 
-#Generowanie wykresu zostało zrobione wraz z pomocą chatbotów
+len_short  = T1FS(len_universe, trapezoid_mf, [-0.1, 0, 5, 10, 1.0])
+len_mid    = T1FS(len_universe, tri_mf, [8, 15, 25, 1.0])
+len_long   = T1FS(len_universe, tri_mf, [20, 40, 60, 1.0])
+len_vlong  = T1FS(len_universe, trapezoid_mf, [50, 70, 100, 100.1, 1.0])
 
-# Wykres PEGI
-plt.subplot(1, 2, 1)
-plt.plot(pegi_domain, trapezoid_mf(pegi_domain, [-1, 0, 7, 10, 1.0]), label='Niskie (3-7)')
-plt.plot(pegi_domain, tri_mf(pegi_domain, [7, 12, 16, 1.0]), label='Średnie (12-16)')
-plt.plot(pegi_domain, trapezoid_mf(pegi_domain, [14, 18, 20, 21, 1.0]), label='Wysokie (18+)')
-plt.title("Zmienna wejściowa: PEGI")
-plt.xlabel("Kategoria wiekowa")
-plt.legend()
-plt.grid(True, alpha=0.3)
+pri_cheap  = T1FS(price_universe, trapezoid_mf, [-0.1, 0, 50, 100, 1.0])
+pri_mid    = T1FS(price_universe, tri_mf, [80, 150, 250, 1.0])
+pri_expensive = T1FS(price_universe, trapezoid_mf, [200, 300, 400, 400.1, 1.0])
 
-# Wykres Mechanik
-plt.subplot(1, 2, 2)
-plt.plot(mech_domain, trapezoid_mf(mech_domain, [-1, 0, 3, 5, 1.0]), label='Mało')
-plt.plot(mech_domain, tri_mf(mech_domain, [3, 6, 9, 1.0]), label='Średnio')
-plt.plot(mech_domain, trapezoid_mf(mech_domain, [7, 10, 15, 16, 1.0]), label='Dużo')
-plt.title("Zmienna wejściowa: Ilość Mechanik")
-plt.xlabel("Liczba mechanik")
-plt.legend()
-plt.grid(True, alpha=0.3)
+#Todo: ulepszyć funkcje
+#funkcje #FRAGMENT AI#
+def q_tragic(o, b, s, l, p): return np.clip(0.1*o - 0.5*b + 0.1*s, 0, 2)
+def q_bad(o, b, s, l, p):    return np.clip(0.2*o - 0.3*b + 0.2*s, 2, 4)
+def q_mid(o, b, s, l, p):    return np.clip(0.4*o - 0.2*b + 0.4*s + 0.05*l, 4, 6)
+def q_good(o, b, s, l, p):   return np.clip(0.5*o - 0.1*b + 0.6*s + 0.05*l, 6, 8)
+def q_perf(o, b, s, l, p):   return np.clip(0.6*o - 0.0*b + 0.8*s + 0.1*l, 8, 10)
 
-plt.tight_layout()
-plt.show()
-
-#Logika funkcji została zrobiona wraz z pomocą chatbotów
-
-# Dla Trudności
-def diff_easy(p, m):   return np.clip(0.5 + 0.4*p + 0.1*m, 0, 10)
-def diff_medium(p, m): return np.clip(2.0 + 0.5*p + 0.2*m, 0, 10)
-def diff_hard(p, m):   return np.clip(4.0 + 0.6*p + 0.3*m, 0, 10)
-
-# Dla Skomplikowania
-def comp_low(p, m):    return np.clip(0.2 + 0.01*p + 0.4*m, 0, 10)
-def comp_med(p, m):    return np.clip(1.0 + 0.02*p + 0.7*m, 0, 10)
-def comp_high(p, m):   return np.clip(2.0 + 0.05*p + 1.1*m, 0, 10)
 
 my_tsk = T1TSK()
-my_tsk.add_input_variable("PEGI")
-my_tsk.add_input_variable("Mechanics")
-my_tsk.add_output_variable("Difficulty")
-my_tsk.add_output_variable("Complexity")
+my_tsk.add_input_variable("Optymalizacja")
+my_tsk.add_input_variable("Bugi")
+my_tsk.add_input_variable("Fabula")
+my_tsk.add_input_variable("Dlugosc")
+my_tsk.add_input_variable("Cena")
 
+my_tsk.add_output_variable("Jakosc_Gry")
 
-my_tsk.add_rule([("PEGI", pegi_low),  ("Mechanics", mech_few)], [("Difficulty", diff_easy), ("Complexity", comp_low)])
-my_tsk.add_rule([("PEGI", pegi_med),  ("Mechanics", mech_few)], [("Difficulty", diff_easy), ("Complexity", comp_low)])
-my_tsk.add_rule([("PEGI", pegi_high), ("Mechanics", mech_few)], [("Difficulty", diff_easy), ("Complexity", comp_low)]) # Np. Walking simulator
+#Todo: dodać więcej reguł
+#reguły
+my_tsk.add_rule([("Optymalizacja", opt_tragic), ("Bugi", bug_many)], [("Jakosc_Gry", q_tragic)])
 
-my_tsk.add_rule([("PEGI", pegi_low),  ("Mechanics", mech_avg)], [("Difficulty", diff_medium), ("Complexity", comp_med)])
-my_tsk.add_rule([("PEGI", pegi_med),  ("Mechanics", mech_avg)], [("Difficulty", diff_medium), ("Complexity", comp_med)])
-my_tsk.add_rule([("PEGI", pegi_high), ("Mechanics", mech_avg)], [("Difficulty", diff_medium), ("Complexity", comp_med)])
+my_tsk.add_rule([("Optymalizacja", opt_mid), ("Bugi", bug_few), ("Fabula", sto_mid)], [("Jakosc_Gry", q_mid)])
 
-my_tsk.add_rule([("PEGI", pegi_low),  ("Mechanics", mech_many)], [("Difficulty", diff_hard), ("Complexity", comp_high)])
-my_tsk.add_rule([("PEGI", pegi_med),  ("Mechanics", mech_many)], [("Difficulty", diff_hard), ("Complexity", comp_high)])
-my_tsk.add_rule([("PEGI", pegi_high), ("Mechanics", mech_many)], [("Difficulty", diff_hard), ("Complexity", comp_high)]) # Np. Symulator lotu / RPG
+my_tsk.add_rule([("Optymalizacja", opt_perf), ("Bugi", bug_none), ("Fabula", sto_cool)], [("Jakosc_Gry", q_perf)])
 
-# w3
-input_pegi =  3.0
-input_mech = 8.0
+#Todo: dodać wykresy przynależności
 
-#
-"""
-geams = [
-    g1 ->
-    g2 ->
-]
+with open("games.json", "r", encoding="utf-8") as f:
+    games = json.load(f)
+    results = []
 
-"""
+    for game in games:
+        inputs = {
+            "Optymalizacja": game["Optymalizacja"],
+            "Bugi": game["Bugi"],
+            "Fabula": game["Fabula"],
+            "Dlugosc": game["Dlugosc"],
+            "Cena": game["Cena"],
+        }
+        tup = (
+            game["Optymalizacja"],
+            game["Bugi"],
+            game["Fabula"],
+            game["Dlugosc"],
+            game["Cena"],
+        )
 
-results = my_tsk.evaluate(
-    {"PEGI": input_pegi, "Mechanics": input_mech}, (input_pegi, input_mech))
+        score = my_tsk.evaluate(inputs, tup)
+        results.append((game["name"], score))
 
-print(f"Wejście -> PEGI: {input_pegi}, Ilość Mechanik: {input_mech}")
-print(f"Ocena Trudności: {round(results['Difficulty'], 2)}")
-print(f"Ocena Skomplikowania: {round(results['Complexity'], 2)}")
-=======
-from pyit2fls import T1TSK, T1FS, tri_mf, trapezoid_mf
-import matplotlib.pyplot as plt
-
-# Uniwersum
-mechanics_universe = np.linspace(0.0, 10.0, 1000)
-length_universe = np.linspace(0.0, 10.0, 1000)
-
-# Zbiory rozmyte dla skomplikowania mechanik
-simple_mechanics = T1FS(mechanics_universe, trapezoid_mf, [-1, 0, 3, 5, 1.0])
-simple_mechanics.plot('simple mechanics')
-medium_mechanics = T1FS(mechanics_universe, tri_mf, [3, 5, 7, 1.0])
-medium_mechanics.plot('medium mechanics')
-complex_mechanics = T1FS(mechanics_universe, trapezoid_mf, [6, 7, 10, 11, 1.0])
-complex_mechanics.plot('complex mechanics')
-
-# Zbiory rozmyte dla długości gry
-short_game = T1FS(length_universe, trapezoid_mf, [-1, 0, 3, 5, 1.0])
-short_game.plot('short <5h')
-medium_game = T1FS(length_universe, tri_mf, [3, 5, 7, 1.0])
-medium_game.plot('medium 20-50h')
-long_game = T1FS(length_universe, trapezoid_mf, [6, 7, 10, 11, 1.0])
-long_game.plot('long 100h+')
-
-# Funkcje dla trudności gry
-def low_difficulty(mech, length):
-    return np.clip(0 + 0.4*mech + 0.2*length, 0, 10)
-
-def medium_difficulty(mech, length):
-    return np.clip(3 + 0.6*mech + 0.4*length, 0, 10)
-
-def high_difficulty(mech, length):
-    return np.clip(6 + 0.8*mech + 0.6*length, 0, 10)
-
-# Funkcje TSK dla TEMPA ROZGRYWKI (0=szybka, 10=wolna)
-def fast_pace(mech, length):
-    return np.clip(0 + 0.7*mech + 0.1*length, 0, 10)  # Short + simple = fast
-
-def medium_pace(mech, length):
-    return np.clip(3 + 0.4*mech + 0.5*length, 0, 10)
-
-def slow_pace(mech, length):
-    return np.clip(6 + 0.2*mech + 0.8*length, 0, 10)  # Long + complex = slow
-
-# Sterowniki TSK
-controller_difficulty = T1TSK()
-controller_pace = T1TSK()
-
-# Zmienne wejściowe
-for ctrl in [controller_difficulty, controller_pace]:
-    ctrl.add_input_variable('mechanics')
-    ctrl.add_input_variable('game_length')
-
-controller_difficulty.add_output_variable('game_difficulty')
-controller_pace.add_output_variable('game_pace')
-
-# Reguły TRUDNOŚCI GRY
-controller_difficulty.add_rule([('mechanics', simple_mechanics), ('game_length', short_game)], [('game_difficulty', low_difficulty)])
-controller_difficulty.add_rule([('mechanics', simple_mechanics), ('game_length', medium_game)], [('game_difficulty', low_difficulty)])
-controller_difficulty.add_rule([('mechanics', simple_mechanics), ('game_length', long_game)], [('game_difficulty', medium_difficulty)])
-controller_difficulty.add_rule([('mechanics', medium_mechanics), ('game_length', short_game)], [('game_difficulty', low_difficulty)])
-controller_difficulty.add_rule([('mechanics', medium_mechanics), ('game_length', medium_game)], [('game_difficulty', medium_difficulty)])
-controller_difficulty.add_rule([('mechanics', medium_mechanics), ('game_length', long_game)], [('game_difficulty', medium_difficulty)])
-controller_difficulty.add_rule([('mechanics', complex_mechanics), ('game_length', short_game)], [('game_difficulty', medium_difficulty)])
-controller_difficulty.add_rule([('mechanics', complex_mechanics), ('game_length', medium_game)], [('game_difficulty', high_difficulty)])
-controller_difficulty.add_rule([('mechanics', complex_mechanics), ('game_length', long_game)], [('game_difficulty', high_difficulty)])
-
-# Reguły TEMPA ROZGRYWKI
-controller_pace.add_rule([('mechanics', simple_mechanics), ('game_length', short_game)], [('game_pace', fast_pace)])
-controller_pace.add_rule([('mechanics', simple_mechanics), ('game_length', medium_game)], [('game_pace', fast_pace)])
-controller_pace.add_rule([('mechanics', simple_mechanics), ('game_length', long_game)], [('game_pace', medium_pace)])
-controller_pace.add_rule([('mechanics', medium_mechanics), ('game_length', short_game)], [('game_pace', fast_pace)])
-controller_pace.add_rule([('mechanics', medium_mechanics), ('game_length', medium_game)], [('game_pace', medium_pace)])
-controller_pace.add_rule([('mechanics', medium_mechanics), ('game_length', long_game)], [('game_pace', medium_pace)])
-controller_pace.add_rule([('mechanics', complex_mechanics), ('game_length', short_game)], [('game_pace', medium_pace)])
-controller_pace.add_rule([('mechanics', complex_mechanics), ('game_length', medium_game)], [('game_pace', medium_pace)])
-controller_pace.add_rule([('mechanics', complex_mechanics), ('game_length', long_game)], [('game_pace', slow_pace)])
-
-game_name = 'Hollow Knight'
-mech_input = 7.0   # Wysokie mechaniki (platformer souls-like)
-length_input = 3.0 # Średnia długość (~30h main+extras)
-
-diff_out = controller_difficulty.evaluate({"mechanics": mech_input, "game_length": length_input}, (mech_input, length_input))
-pace_out = controller_pace.evaluate({"mechanics": mech_input, "game_length": length_input}, (mech_input, length_input))
-
-print(f"{game_name} (mechanics={mech_input}, length={length_input}):")
-print("Trudność gry:", round(diff_out['game_difficulty'], 2))
-print("Tempo rozgrywki:", round(pace_out['game_pace'], 2))
-plt.show()
->>>>>>> 172364f (feat: changed project logic, moved input values to json file)
+    for name, score in results:
+        print(name, score)
