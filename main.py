@@ -7,7 +7,7 @@ import json
 opt_universe = np.linspace(0, 10, 100)
 bug_universe = np.linspace(0, 10, 100)
 story_universe = np.linspace(0, 10, 100)
-len_universe = np.linspace(5, 50, 100)
+len_universe = np.linspace(5, 150, 100)
 price_universe = np.linspace(0, 300, 100)
 quality_universe = np.linspace(0, 10, 100)
 
@@ -26,10 +26,10 @@ sto_boring = T1FS(story_universe, trapezoid_mf, [-0.1, 0, 3, 5, 1.0])
 sto_mid    = T1FS(story_universe, tri_mf, [4, 6, 8, 1.0])
 sto_cool   = T1FS(story_universe, trapezoid_mf, [7, 9, 10, 10.1, 1.0])
 
-len_short  = T1FS(len_universe, trapezoid_mf, [-0.1, 0, 5, 10, 1.0])
-len_mid    = T1FS(len_universe, tri_mf, [8, 15, 25, 1.0])
-len_long   = T1FS(len_universe, tri_mf, [20, 40, 60, 1.0])
-len_vlong  = T1FS(len_universe, trapezoid_mf, [50, 70, 100, 100.1, 1.0])
+len_short  = T1FS(len_universe, trapezoid_mf, [-1, 0, 10, 20, 1.0])
+len_mid    = T1FS(len_universe, tri_mf, [15, 30, 50, 1.0])
+len_long   = T1FS(len_universe, tri_mf, [40, 65, 90, 1.0])
+len_vlong  = T1FS(len_universe, trapezoid_mf, [80, 110, 150, 150.1, 1.0])
 
 pri_cheap  = T1FS(price_universe, trapezoid_mf, [-0.1, 0, 50, 100, 1.0])
 pri_mid    = T1FS(price_universe, tri_mf, [80, 150, 250, 1.0])
@@ -88,25 +88,32 @@ T1FS_plot(
     xlabel="Jakosc", ylabel="Przynależność"
 )
 
-
-#Todo: ulepszyć funkcje
-#funkcje #FRAGMENT AI#
+#funkcje #FRAGMENT AI# prompt -> Porpaw logikę tych funkcji by miały więcej sensu
 def q_tragic(o, b, s, l, p):
-    return 0.1*o - 0.3*b + 0.1*s + 0.5
+    # Kategoria: Tragedia. Bugi mają tu niszczycielską wagę (-0.6).
+    # Nawet przy dobrej fabule, duża liczba błędów sprowadzi wynik w okolice 0.
+    return 0.1*o - 0.6*b + 0.1*s + 0.5
 
 def q_bad(o, b, s, l, p):
-    return 0.15*o - 0.2*b + 0.2*s + 1.5
+    # Kategoria: Słaba gra. Wciąż silna kara za bugi (-0.4).
+    # Bias 1.5 pozwala na uzyskanie niskiej oceny, ale wyższej niż w q_tragic.
+    return 0.15*o - 0.4*b + 0.2*s + 1.5
 
 def q_mid(o, b, s, l, p):
-    return 0.2*o - 0.15*b + 0.3*s + 0.01*l + 3.0
+    # Kategoria: Średniak. Balans między błędami a treścią.
+    # Długość (l) zaczyna mieć marginalny wpływ (0.01).
+    return 0.2*o - 0.3*b + 0.3*s + 0.01*l + 3.0
 
 def q_good(o, b, s, l, p):
-    # Nawet przy p=0 i max reszcie, wynik nie wystrzeli zbyt wysoko
-    return 0.2*o - 0.1*b + 0.4*s + 0.01*l + 4.0
+    # Kategoria: Dobra gra. Wysoki bias (4.0) gwarantuje solidną podstawę oceny.
+    # Kara za bugi (-0.2) jest odczuwalna – zabugowana gra nie "udaje" ideału.
+    return 0.2*o - 0.2*b + 0.4*s + 0.01*l + 4.0
 
 def q_perf(o, b, s, l, p):
-    # Max: 0.2*10 - 0.05*0 + 0.5*10 + 0.01*50 + 2.5 = 2 + 5 + 0.5 + 2.5 = 10.0
-    return 0.2*o - 0.05*b + 0.5*s + 0.01*l + 2.5
+    # Kategoria: Majstersztyk. Największa waga fabuły (0.5).
+    # Przy b=0, o=10, s=10 i l=50, funkcja zwraca idealne 10.0.
+    # Każdy bug tutaj boli bardziej, bo psuje odbiór "perfekcji" (-0.2).
+    return 0.2*o - 0.2*b + 0.5*s + 0.01*l + 2.5
 
 my_tsk = T1TSK()
 my_tsk.add_input_variable("Optymalizacja")
