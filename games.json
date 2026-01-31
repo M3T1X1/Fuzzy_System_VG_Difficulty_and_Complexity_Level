@@ -33,10 +33,10 @@
   },
   {
     "name": "Game E",
-    "Optymalizacja": 5.0,
-    "Bugi": 4.0,
+    "Optymalizacja": 10.0,
+    "Bugi": 0.0,
     "Fabula": 9.5,
-    "Dlugosc": 40.0,
-    "Cena": 150.0
+    "Dlugosc": 50.0,
+    "Cena": 100.0
   }
 ]

@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pyit2fls import T1TSK, T1FS, tri_mf, trapezoid_mf
+from pyit2fls import T1TSK, T1FS, tri_mf, trapezoid_mf, T1FS_plot
 import json
 
 #uniwersa
@@ -9,6 +9,7 @@ bug_universe = np.linspace(0, 10, 100)
 story_universe = np.linspace(0, 10, 100)
 len_universe = np.linspace(5, 50, 100)
 price_universe = np.linspace(0, 300, 100)
+quality_universe = np.linspace(0, 10, 100)
 
 #zbiory rozmyte
 opt_tragic = T1FS(opt_universe, trapezoid_mf, [-0.1, 0, 2, 4, 1.0])
@@ -34,14 +35,78 @@ pri_cheap  = T1FS(price_universe, trapezoid_mf, [-0.1, 0, 50, 100, 1.0])
 pri_mid    = T1FS(price_universe, tri_mf, [80, 150, 250, 1.0])
 pri_expensive = T1FS(price_universe, trapezoid_mf, [200, 300, 400, 400.1, 1.0])
 
+qual_tragic = T1FS(quality_universe, trapezoid_mf, [-0.5, 0, 1.5, 3.5, 1.0])
+qual_bad    = T1FS(quality_universe, tri_mf,        [2, 3.5, 5, 1.0])
+qual_mid    = T1FS(quality_universe, tri_mf,        [4, 5.5, 7, 1.0])
+qual_good   = T1FS(quality_universe, tri_mf,        [6, 7.5, 8.5, 1.0])
+qual_perf   = T1FS(quality_universe, trapezoid_mf,  [7.5, 9, 10.5, 11, 1.0])
+
+#wykresy przynależności
+T1FS_plot(
+    opt_tragic, opt_mid, opt_good, opt_perf,
+    title="Optymalizacja",
+    legends=["tragic", "mid", "good", "perf"],
+    xlabel="Wartość", ylabel="Przynależność"
+)
+
+# Bugi
+T1FS_plot(
+    bug_none, bug_few, bug_med, bug_many,
+    title="Bugi",
+    legends=["none", "few", "med", "many"],
+    xlabel="Wartość", ylabel="Przynależność"
+)
+
+# Fabula
+T1FS_plot(
+    sto_boring, sto_mid, sto_cool,
+    title="Fabula",
+    legends=["boring", "mid", "cool"],
+    xlabel="Wartość", ylabel="Przynależność"
+)
+
+# Dlugosc
+T1FS_plot(
+    len_short, len_mid, len_long, len_vlong,
+    title="Dlugosc",
+    legends=["short", "mid", "long", "vlong"],
+    xlabel="Wartość", ylabel="Przynależność"
+)
+
+# Cena
+T1FS_plot(
+    pri_cheap, pri_mid, pri_expensive,
+    title="Cena",
+    legends=["cheap", "mid", "expensive"],
+    xlabel="Wartość", ylabel="Przynależność"
+)
+
+T1FS_plot(
+    qual_tragic, qual_bad, qual_mid, qual_good, qual_perf,
+    title="Jakosc Gry",
+    legends=["tragic", "bad", "mid", "good", "perf"],
+    xlabel="Jakosc", ylabel="Przynależność"
+)
+
+
 #Todo: ulepszyć funkcje
 #funkcje #FRAGMENT AI#
-def q_tragic(o, b, s, l, p): return np.clip(0.1*o - 0.5*b + 0.1*s, 0, 2)
-def q_bad(o, b, s, l, p):    return np.clip(0.2*o - 0.3*b + 0.2*s, 2, 4)
-def q_mid(o, b, s, l, p):    return np.clip(0.4*o - 0.2*b + 0.4*s + 0.05*l, 4, 6)
-def q_good(o, b, s, l, p):   return np.clip(0.5*o - 0.1*b + 0.6*s + 0.05*l, 6, 8)
-def q_perf(o, b, s, l, p):   return np.clip(0.6*o - 0.0*b + 0.8*s + 0.1*l, 8, 10)
+def q_tragic(o, b, s, l, p):
+    return 0.1*o - 0.3*b + 0.1*s + 0.5
 
+def q_bad(o, b, s, l, p):
+    return 0.15*o - 0.2*b + 0.2*s + 1.5
+
+def q_mid(o, b, s, l, p):
+    return 0.2*o - 0.15*b + 0.3*s + 0.01*l + 3.0
+
+def q_good(o, b, s, l, p):
+    # Nawet przy p=0 i max reszcie, wynik nie wystrzeli zbyt wysoko
+    return 0.2*o - 0.1*b + 0.4*s + 0.01*l + 4.0
+
+def q_perf(o, b, s, l, p):
+    # Max: 0.2*10 - 0.05*0 + 0.5*10 + 0.01*50 + 2.5 = 2 + 5 + 0.5 + 2.5 = 10.0
+    return 0.2*o - 0.05*b + 0.5*s + 0.01*l + 2.5
 
 my_tsk = T1TSK()
 my_tsk.add_input_variable("Optymalizacja")
@@ -52,15 +117,198 @@ my_tsk.add_input_variable("Cena")
 
 my_tsk.add_output_variable("Jakosc_Gry")
 
-#Todo: dodać więcej reguł
 #reguły
-my_tsk.add_rule([("Optymalizacja", opt_tragic), ("Bugi", bug_many)], [("Jakosc_Gry", q_tragic)])
+# ------------------ Quality Tragic ---------------------
+my_tsk.add_rule(
+    [("Optymalizacja", opt_tragic), ("Bugi", bug_many)],
+    [("Jakosc_Gry", q_tragic)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_tragic), ("Bugi", bug_med)],
+    [("Jakosc_Gry", q_tragic)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Bugi", bug_many)],
+    [("Jakosc_Gry", q_tragic)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_tragic), ("Bugi", bug_few), ("Fabula", sto_boring)],
+    [("Jakosc_Gry", q_tragic)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_tragic), ("Fabula", sto_boring), ("Dlugosc", len_vlong)],
+    [("Jakosc_Gry", q_tragic)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_tragic), ("Fabula", sto_boring), ("Cena", pri_expensive)],
+    [("Jakosc_Gry", q_tragic)]
+)
 
-my_tsk.add_rule([("Optymalizacja", opt_mid), ("Bugi", bug_few), ("Fabula", sto_mid)], [("Jakosc_Gry", q_mid)])
+# ------------------ Quality Bad ---------------------
+my_tsk.add_rule(
+    [("Optymalizacja", opt_tragic), ("Bugi", bug_few), ("Fabula", sto_mid)],
+    [("Jakosc_Gry", q_bad)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_tragic), ("Bugi", bug_none), ("Fabula", sto_boring)],
+    [("Jakosc_Gry", q_bad)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Bugi", bug_med)],
+    [("Jakosc_Gry", q_bad)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Bugi", bug_many)],
+    [("Jakosc_Gry", q_bad)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Fabula", sto_boring)],
+    [("Jakosc_Gry", q_bad)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Fabula", sto_boring)],
+    [("Jakosc_Gry", q_bad)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Fabula", sto_mid), ("Bugi", bug_med)],
+    [("Jakosc_Gry", q_bad)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Fabula", sto_mid), ("Cena", pri_expensive)],
+    [("Jakosc_Gry", q_bad)]
+)
 
-my_tsk.add_rule([("Optymalizacja", opt_perf), ("Bugi", bug_none), ("Fabula", sto_cool)], [("Jakosc_Gry", q_perf)])
+# ------------------ Quality Mid ---------------------
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Bugi", bug_few), ("Fabula", sto_mid)],
+    [("Jakosc_Gry", q_mid)]
+)  # ta już była u Ciebie
 
-#Todo: dodać wykresy przynależności
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Bugi", bug_none), ("Fabula", sto_mid)],
+    [("Jakosc_Gry", q_mid)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Bugi", bug_few), ("Fabula", sto_cool)],
+    [("Jakosc_Gry", q_mid)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Bugi", bug_med), ("Fabula", sto_mid)],
+    [("Jakosc_Gry", q_mid)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Bugi", bug_few), ("Fabula", sto_mid)],
+    [("Jakosc_Gry", q_mid)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Bugi", bug_none), ("Fabula", sto_boring)],
+    [("Jakosc_Gry", q_mid)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Fabula", sto_cool), ("Bugi", bug_med)],
+    [("Jakosc_Gry", q_mid)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Fabula", sto_mid), ("Dlugosc", len_mid)],
+    [("Jakosc_Gry", q_mid)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Fabula", sto_mid), ("Cena", pri_mid)],
+    [("Jakosc_Gry", q_mid)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Fabula", sto_boring), ("Dlugosc", len_mid)],
+    [("Jakosc_Gry", q_mid)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Fabula", sto_mid), ("Dlugosc", len_vlong)],
+    [("Jakosc_Gry", q_mid)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Fabula", sto_cool), ("Cena", pri_expensive)],
+    [("Jakosc_Gry", q_mid)]
+)
+
+# ------------------ Quality Good ---------------------
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Bugi", bug_few), ("Fabula", sto_cool)],
+    [("Jakosc_Gry", q_good)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Bugi", bug_none), ("Fabula", sto_mid)],
+    [("Jakosc_Gry", q_good)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Bugi", bug_none), ("Fabula", sto_cool)],
+    [("Jakosc_Gry", q_good)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_perf), ("Bugi", bug_med), ("Fabula", sto_cool)],
+    [("Jakosc_Gry", q_good)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_perf), ("Bugi", bug_few), ("Fabula", sto_mid)],
+    [("Jakosc_Gry", q_good)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Fabula", sto_cool), ("Dlugosc", len_mid)],
+    [("Jakosc_Gry", q_good)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Fabula", sto_mid), ("Dlugosc", len_short)],
+    [("Jakosc_Gry", q_good)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Fabula", sto_mid), ("Cena", pri_cheap)],
+    [("Jakosc_Gry", q_good)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_mid), ("Fabula", sto_cool), ("Cena", pri_cheap)],
+    [("Jakosc_Gry", q_good)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_perf), ("Fabula", sto_mid), ("Cena", pri_mid)],
+    [("Jakosc_Gry", q_good)]
+)
+
+# ------------------ Quality Perfect ---------------------
+my_tsk.add_rule(
+    [("Optymalizacja", opt_perf), ("Bugi", bug_none), ("Fabula", sto_cool)],
+    [("Jakosc_Gry", q_perf)]
+)  #
+my_tsk.add_rule(
+    [("Optymalizacja", opt_perf), ("Bugi", bug_few), ("Fabula", sto_cool)],
+    [("Jakosc_Gry", q_perf)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Bugi", bug_none), ("Fabula", sto_cool)],
+    [("Jakosc_Gry", q_perf)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_perf), ("Bugi", bug_none), ("Fabula", sto_mid), ("Dlugosc", len_mid)],
+    [("Jakosc_Gry", q_perf)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_perf), ("Bugi", bug_none), ("Fabula", sto_cool), ("Dlugosc", len_mid)],
+    [("Jakosc_Gry", q_perf)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_perf), ("Bugi", bug_none), ("Fabula", sto_cool), ("Cena", pri_cheap)],
+    [("Jakosc_Gry", q_perf)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Bugi", bug_none), ("Fabula", sto_cool), ("Cena", pri_cheap)],
+    [("Jakosc_Gry", q_perf)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_good), ("Bugi", bug_none), ("Fabula", sto_cool), ("Dlugosc", len_mid)],
+    [("Jakosc_Gry", q_perf)]
+)
+my_tsk.add_rule(
+    [("Optymalizacja", opt_perf), ("Bugi", bug_none), ("Fabula", sto_cool),
+     ("Dlugosc", len_long), ("Cena", pri_mid)],
+    [("Jakosc_Gry", q_perf)]
+)
 
 with open("games.json", "r", encoding="utf-8") as f:
     games = json.load(f)
@@ -82,8 +330,40 @@ with open("games.json", "r", encoding="utf-8") as f:
             game["Cena"],
         )
 
-        score = my_tsk.evaluate(inputs, tup)
+        evaluation_result = my_tsk.evaluate(inputs, tup)
+        raw_score = evaluation_result["Jakosc_Gry"]
+        score = np.clip(raw_score, 0, 10)
         results.append((game["name"], score))
 
+    # fragment AI; prompt -> Do wykresu "Jakosc Gry" dodaj wynik gry.
+    plt.figure(figsize=(12, 8))
+
+    mfs = [qual_tragic, qual_bad, qual_mid, qual_good, qual_perf]
+    labels = ["tragic", "bad", "mid", "good", "perf"]
+
+    for mf, label in zip(mfs, labels):
+        y_values = [mf(x) for x in quality_universe]
+        plt.plot(quality_universe, y_values, label=label, alpha=0.7, linewidth=2)
+
+    colors = ["black", "red", "green", "blue", "magenta", "cyan", "yellow", "orange", "brown"]
+    for i, (name, score) in enumerate(results):
+        plt.axvline(x=float(score),
+                    color=colors[i % len(colors)],
+                    linestyle="--",
+                    linewidth=2.5,
+                    label=f"{name}")
+
+    plt.title("Wyniki")
+    plt.xlabel("Jakość gry")
+    plt.ylabel("Stopień przynależności")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.grid(True, which='both', linestyle=':', alpha=0.5)
+    plt.ylim(-0.05, 1.05)
+    plt.xlim(0, 10)
+
+    plt.tight_layout()
+    plt.show()
+
+    print("\n=== WYNIKI ===")
     for name, score in results:
-        print(name, score)
+        print(f"{name}: {score:.4f}")
